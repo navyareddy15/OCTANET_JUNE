@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title> To-Do App </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://i.pinimg.com/originals/bd/8a/e7/bd8ae72f43969de3c9efbfc13b82bbdf.jpg');
+            background-size: cover;
+            background-color: rgba(0, 0, 0, 0.5); 
+            background-blend-mode: darken;
+            color: white;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #app {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8); 
+            padding: 30px; 
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .task {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px; 
+            border-bottom: 1px solid #ccc;
+            align-items: center;
+        }
+        .task .completed {
+            text-decoration: line-through;
+        }
+        .task .task-text {
+            flex-grow: 1;
+        }
+        .task button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <h1>To-Do</h1>
+
+    <form id="taskForm">
+        <label for="taskInput">New Task:</label>
+        <input type="text" id="taskInput" required>
+        <label for="taskDescription">Description:</label>
+        <input type="text" id="taskDescription">
+        <button type="button" onclick="addTask()">Add Task</button>
+    </form>
+
+    <h2>Pending Task works</h2>
+    <ul id="pendingTasks"></ul>
+
+    <h2>Completed Task works</h2>
+    <ul id="completedTasks"></ul>
+</div>
+
+<script>
+    function addTask() {
+        const taskInput = document.getElementById('taskInput');
+        const taskDescription = document.getElementById('taskDescription');
+        const taskText = taskInput.value.trim();
+        const descriptionText = taskDescription.value.trim();
+
+        if (taskText !== '') {
+            const task = {
+                text: taskText,
+                description: descriptionText,
+                addedAt: new Date(),
+                completed: false,
+            };
+
+            tasks.push(task);
+            saveTasks();
+            renderTasks();
+            taskInput.value = '';
+            taskDescription.value = '';
+        }
+    }
+
+    function toggleComplete(index) {
+        tasks[index].completed = !tasks[index].completed;
+        saveTasks();
+        renderTasks();
+    }
+
+    function deleteTask(index) {
+        tasks.splice(index, 1);
+        saveTasks();
+        renderTasks();
+    }
+
+    function editTask(index) {
+        const task = tasks[index];
+        const newTaskText = prompt('Edit task:', task.text);
+        const newDescriptionText = prompt('Edit description:', task.description);
+
+        if (newTaskText !== null) task.text = newTaskText.trim();
+        if (newDescriptionText !== null) task.description = newDescriptionText.trim();
+
+        saveTasks();
+        renderTasks();
+    }
+
+    function saveTasks() {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+        const storedTasks = localStorage.getItem('tasks');
+        return storedTasks ? JSON.parse(storedTasks) : [];
+    }
+
+    function renderTasks() {
+        const pendingTasksList = document.getElementById('pendingTasks');
+        const completedTasksList = document.getElementById('completedTasks');
+        pendingTasksList.innerHTML = '';
+        completedTasksList.innerHTML = '';
+
+        tasks.forEach((task, index) => {
+            const listItem = document.createElement('li');
+            listItem.className = 'task';
+            listItem.innerHTML = `
+                <div class="task-text ${task.completed ? 'completed' : ''}">
+                    <strong>${task.text}</strong><br>
+                    ${task.description ? `Description: ${task.description}` : ''}
+                </div>
+                <div>
+                    <button onclick="toggleComplete(${index})">${task.completed ? 'Undo' : 'Complete'}</button>
+                    <button onclick="editTask(${index})">Edit</button>
+                    <button onclick="deleteTask(${index})">Delete</button>
+                </div>
+            `;
+            
+            if (task.completed) {
+                completedTasksList.appendChild(listItem);
+            } else {
+                pendingTasksList.appendChild(listItem);
+            }
+        });
+    }
+
+    let tasks = loadTasks();
+
+    renderTasks();
+</script>
+
+</body>
+</html>
